@@ -1,36 +1,42 @@
 package markom.cs101.autobuskastanica;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public class AutobuskaLinija extends Relacija{
+public class AutobuskaLinija extends Relacija {
     private String prevoznik;
     private LocalDateTime vremePolaska;
     private int brSedistaUAutobusu;
     private String sifraPolaska;
+    private TipVozila tipVozila;
+    private int cena;
+    private int brSlobodnihMesta;
 
-    public AutobuskaLinija(String odMesta, String doMesta, String prevoznik, LocalDateTime vremePolaska, int brSedistaUAutobusu, String sifraPolaska) {
+
+    public AutobuskaLinija(String odMesta, String doMesta, String prevoznik, LocalDateTime vremePolaska, int brSedistaUAutobusu, String sifraPolaska, TipVozila tipVozila, int cena) {
         super(odMesta, doMesta);
         this.prevoznik = prevoznik;
         this.vremePolaska = vremePolaska;
         this.brSedistaUAutobusu = brSedistaUAutobusu;
         this.sifraPolaska = sifraPolaska;
-    }
+        this.tipVozila = tipVozila;
+        this.cena = cena;
 
-    public AutobuskaLinija(String odMesta, String doMesta) {
-        super(odMesta, doMesta);
+        this.brSlobodnihMesta = brSedistaUAutobusu;
     }
 
     @Override
     public String toString() {
-        return "AutobuskaLinija{ " +
-                "prevoznik="+ prevoznik +
-                ", odMesta="+ getOdMesta() +
-                ", doMesta="+ getDoMesta() +
-                ", vremePolaska=" + Tools.DATE_TIME_FORMAT.format(vremePolaska) +
-                ", brSedistaUAutobusu=" + brSedistaUAutobusu +
-                ", sifraPolaska='" + sifraPolaska + '\'' +
-                '}';
+        return
+                "prevoznik: "+ prevoznik +
+                ", od: "+ getOdMesta() +
+                ", do: "+ getDoMesta() +
+                ", vreme polaska: " + Tools.DATE_TIME_FORMAT.format(vremePolaska) +
+                ", tip: " + tipVozila.toString().toLowerCase().replace('_', ' ') +
+                ", max sedista: " + brSedistaUAutobusu +
+                ", sifra polaska: " + sifraPolaska +
+                ", cena: " + cena +
+                ", slobodnih mesta: " + brSlobodnihMesta
+                ;
     }
 
     public String getPrevoznik() {
@@ -63,5 +69,29 @@ public class AutobuskaLinija extends Relacija{
 
     public void setSifraPolaska(String sifraPolaska) {
         this.sifraPolaska = sifraPolaska;
+    }
+
+    public TipVozila getTipVozila() {
+        return tipVozila;
+    }
+
+    public void setTipVozila(TipVozila tipVozila) {
+        this.tipVozila = tipVozila;
+    }
+
+    public int getCena() {
+        return cena;
+    }
+
+    public void setCena(int cena) {
+        this.cena = cena;
+    }
+
+    public int getBrSlobodnihMesta() {
+        return brSlobodnihMesta;
+    }
+
+    public void setBrSlobodnihMesta(int brSlobodnihMesta) {
+        this.brSlobodnihMesta = brSlobodnihMesta;
     }
 }

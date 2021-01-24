@@ -6,29 +6,10 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
-
-    private static Scanner scanner=new Scanner(System.in);
-
-    public static int readInt(int max){
-        while (true){
-            try {
-                int i = scanner.nextInt();
-                if (i < 1 || i > max) {
-                    System.out.println("Unesite broj opcije izmedju 1 i "+max);
-                }else {
-                    return i;
-                }
-            }catch (InputMismatchException e){
-                //go around again
-                scanner.nextLine();
-                System.out.println("Unesite broj opcije izmedju 1-"+max);
-            }
-        }
-    }
-
-    public static void rezervisi(){
+    
+    public static void rezervisi() throws PrekidOperacije {
         Baza baza=new Baza();
-        boolean prekid=false;
+//        boolean prekid=false;
 
         //while(!prekid){}
         // sve moguce polazne lokacije
@@ -37,7 +18,7 @@ public class Main {
             System.out.println((i+1)+". "+polazneLokacije.get(i));
         }
         System.out.println("---Odaberite polaznu lokaciju---");
-        int pL=readInt(polazneLokacije.size()); // polazna lokacija
+        int pL=Tools.readInt(polazneLokacije.size()); // polazna lokacija
 
         // moguce destinacije za odabranu pocetnu lokaciju
         ArrayList<String> moguceDestinacije= baza.mogucaOdredista(polazneLokacije.get(pL-1));
@@ -45,7 +26,7 @@ public class Main {
             System.out.println((i+1)+". "+moguceDestinacije.get(i));
         }
         System.out.println("---Odaberite destinaciju---");
-        int d=readInt(moguceDestinacije.size()); // destinacija
+        int d=Tools.readInt(moguceDestinacije.size()); // destinacija
 
         // moguci datumi polaska za odabranu destinaciju
         ArrayList<String> moguciDatumi = baza.datumPolaska(polazneLokacije.get(pL-1),moguceDestinacije.get(d-1));
@@ -53,58 +34,86 @@ public class Main {
             System.out.println((i+1)+". "+moguciDatumi.get(i));
         }
         System.out.println("---Odaberite datum polaska---");
-        int datum = readInt(moguciDatumi.size()); // datum
-
-        // moguca vremena polaska za odabrani datum polaska
-        ArrayList<String> vremenaPolaska = baza.vremePolaska(polazneLokacije.get(pL-1),moguceDestinacije.get(d-1),moguciDatumi.get(datum-1));
-        for (int i=0;i<vremenaPolaska.size();i++){
-            System.out.println((i+1)+". "+vremenaPolaska.get(i));
-        }
-        System.out.println("---Odaberite vreme polaska---");
-        int vreme = readInt(vremenaPolaska.size()); // datum
+        int datum = Tools.readInt(moguciDatumi.size()); // datum
 
         // moguci prevoznici za dato vreme polaska
-        ArrayList<String> prevoznici = baza.moguciPrevoznici(polazneLokacije.get(pL-1),moguceDestinacije.get(d-1),moguciDatumi.get(datum-1),vremenaPolaska.get(vreme-1));
-        for (int i=0;i<prevoznici.size();i++){
-            System.out.println((i+1)+". "+prevoznici.get(i));
+        ArrayList<AutobuskaLinija> polasci = baza.moguciPolasci(polazneLokacije.get(pL-1),moguceDestinacije.get(d-1),moguciDatumi.get(datum-1));
+        for (int i=0;i<polasci.size();i++){
+            System.out.println((i+1) + ". " + polasci.get(i));
         }
-        System.out.println("---Odaberite prevoznika---");
-        int prevoznik = readInt(prevoznici.size()); // datum
+        System.out.println("---Odaberite polazak---");
+        int prevoznik = Tools.readInt(polasci.size()); // datum
+
+        AutobuskaLinija polazak = polasci.get(prevoznik-1);
 
         // odabir sedista
-        System.out.println("----Na kom mestu biste hteli da sedite----");
-        // zavrsicu danas kad zavrsim  matematiku
+        System.out.println("--- Koliko mesta zelite da rezervisete? (1-" + polazak.getBrSlobodnihMesta() + ")");
+        int brMesta = Tools.readInt(polazak.getBrSlobodnihMesta());
+
+        System.out.println("--- Na koje ime glasi rezervacija? ---");
+        String ime = Tools.readString();
+
+        Rezervacija rezervacija = new Rezervacija(polazak.getSifraPolaska(), ime, brMesta);
+        if (Baza.rezervisi(polazak, rezervacija)) {
+            System.out.println("USPESNO STE REZERVISALI KARTU");
+        }
+        else {
+            System.out.println("NEUSPESNA REZERVACIJA");
+        }
+    }
+
+    public static void izvezi() throws PrekidOperacije {
+        System.out.println("--- Unesite ime fajla ---");
+        String imeFajla = Tools.readString();
+        Baza.exportRezervacije(imeFajla);
     }
 
     public static void printMenu(){
         System.out.println("=============Menu=============");
-        System.out.println("1. Izadjite iz aplikacije");
-        System.out.println("2. Rezervisite mesto");
-        System.out.println("3. Prikazite meni");
+        System.out.println("1. Rezervisite kartu");
+        System.out.println("2. Prikazite meni");
+        System.out.println("3. Prikazite sve polaske");
+        System.out.println("4. Prikazite sve rezervacije");
+        System.out.println("5. Izvezite rezervacije u fajl");
+        System.out.println("0. Izadjite iz aplikacije");
         System.out.println("==============================");
     }
 
     public static void application(){
         boolean quit=false;
-        printMenu();
         while (!quit){
-            System.out.println("==============================");
-            System.out.println("Odaberite neku opciju iz menija");
-            int option=readInt(3);
-            switch (option){
-                case 1:
-                    quit=true;
-                    System.out.println("Exiting application...");
-                    break;
-                case 2:
-                    rezervisi();
-                    break;
-                case 3:
-                    printMenu();
-                    break;
-                default:
-                    System.out.println("Niste odabrali validnu opciju, probajte ponovo");
-                    break;
+            printMenu();
+            System.out.println("Odaberite neku od opcija unosom broja opcije");
+            try {
+                int option = Tools.readInt(5);
+                switch (option) {
+                    case 1:
+                        try {
+                            rezervisi();
+                        } catch (PrekidOperacije po) {
+                            // uhvatili smo exception za prekid trenutne operacije i vracamo se na meni
+                            System.out.println("Izasli ste iz kreiranja rezervacije");
+                        }
+                        break;
+                    case 2:
+                        break; // jer uvek stampamo...
+                    case 3:
+                        Baza.stampajSveLinije();
+                        break;
+                    case 4:
+                        Baza.stampajSveRezervacije();
+                        break;
+                    case 5:
+                        izvezi();
+                        break;
+                    default:
+                        System.out.println("Niste odabrali validnu opciju, probajte ponovo");
+                        break;
+                }
+            }
+            catch (PrekidOperacije e) {
+                quit = true;
+                System.out.println("Exiting application...");
             }
         }
     }

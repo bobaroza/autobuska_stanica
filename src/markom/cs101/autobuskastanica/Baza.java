@@ -1,22 +1,16 @@
 package markom.cs101.autobuskastanica;
 
-import javax.xml.crypto.Data;
 import java.io.*;
-import java.io.FileWriter;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
 
 public class Baza {
 
 
-    private static List<AutobuskaLinija> listaLinija = new ArrayList<AutobuskaLinija>();
+    private static List<AutobuskaLinija> listaLinija = new ArrayList<>();
 
-    public Baza(){}
+    private static List<Rezervacija> rezervacije = new ArrayList<>();
 
     public static List<AutobuskaLinija> getListaLinija() {
         return new ArrayList<AutobuskaLinija>(listaLinija);
@@ -61,11 +55,11 @@ public class Baza {
         return vremenaPolaska;
     }
 
-    public ArrayList<String> moguciPrevoznici(String polaznaLokacija, String odrediste,String datum,String vreme){
-        ArrayList<String> prevoznici=new ArrayList<String>();
+    public ArrayList<AutobuskaLinija> moguciPolasci(String polaznaLokacija, String odrediste, String datum){
+        ArrayList<AutobuskaLinija> prevoznici = new ArrayList<>();
         for (AutobuskaLinija linija: listaLinija){
-            if (linija.getOdMesta().equals(polaznaLokacija) && linija.getDoMesta().equals(odrediste) && Tools.DATE_FORMATTER.format(linija.getVremePolaska()).equals(datum) && Tools.TIME_FORMAT.format(linija.getVremePolaska()).equals(vreme)){
-                prevoznici.add(linija.getPrevoznik());
+            if (linija.getOdMesta().equals(polaznaLokacija) && linija.getDoMesta().equals(odrediste) && Tools.DATE_FORMATTER.format(linija.getVremePolaska()).equals(datum)){
+                prevoznici.add(linija);
             }
         }
         return prevoznici;
@@ -73,25 +67,6 @@ public class Baza {
 
     private static LocalDateTime parsuj(String datum, String vreme){
         return LocalDateTime.from(Tools.DATE_TIME_FORMAT.parse(datum + " " + vreme));
-
-//        String[] arrayDatum = datum.split("-");
-//        System.out.println(Arrays.toString(arrayDatum));
-//        int dan=Integer.parseInt(arrayDatum[0]);
-//        int mesec=Integer.parseInt(arrayDatum[1]);
-//        int godina=Integer.parseInt(arrayDatum[2]);
-//
-//        String[] arrayVreme=vreme.split(":");
-//        int sat=Integer.parseInt(arrayVreme[0]);
-//        int minut=Integer.parseInt(arrayVreme[1]);
-//
-//
-//        LocalDateTime a = LocalDateTime.of(godina,mesec,dan,sat,minut);
-//
-//        //verovatno je dobra ideja da se ovako uradi
-////        DateTimeFormatter format = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
-////        String formatDateTime = datetime2.format(format);
-//
-//        return a;
     }
 
     /*public static void citanje() throws IOException*/static {
@@ -99,6 +74,9 @@ public class Baza {
             String s;
             while ((s=bf.readLine())!=null){
                 String[] data=s.split(",");
+                if (data.length < 9)
+                    continue;
+
                 String sifra=data[0];
                 String kompanija=data[1];
                 String pocetak=data[2];
@@ -109,7 +87,10 @@ public class Baza {
                 LocalDateTime a = parsuj(datum,vreme);
 
                 int brojMesta=Integer.parseInt(data[6]);
-                AutobuskaLinija novaLinija=new AutobuskaLinija(pocetak, odrediste, kompanija, a, brojMesta, sifra);
+                TipVozila tip = TipVozila.valueOf(data[7]);
+                int cena=Integer.parseInt(data[8]);
+
+                AutobuskaLinija novaLinija=new AutobuskaLinija(pocetak, odrediste, kompanija, a, brojMesta, sifra, tip, cena);
                 listaLinija.add(novaLinija);
             }
         }catch (IOException e){
@@ -117,16 +98,46 @@ public class Baza {
         }
     }
 
-    protected static void stampajListeLinija(List<AutobuskaLinija> linijeLista){
-        for (AutobuskaLinija autobuskaLinija: linijeLista){
+    public static void exportRezervacije(String file) {
+        try(BufferedWriter w = new BufferedWriter(new FileWriter(file))) {
+            for (Rezervacija r : rezervacije) {
+                w.write(r.getSifraPolaska());
+                w.write(",\"");
+                w.write(r.getIme());
+                w.write("\",");
+                w.write(String.valueOf(r.getBrMesta()));
+                w.write('\n');
+            }
+        } catch (IOException e) {
+            System.err.println("Neuspesan upis u fajl: " + e.getMessage());
+        }
+    }
+
+    public static boolean rezervisi(AutobuskaLinija al, Rezervacija r) {
+        if (r.getBrMesta() < al.getBrSlobodnihMesta()) {
+            al.setBrSlobodnihMesta(al.getBrSlobodnihMesta() - r.getBrMesta());
+            rezervacije.add(r);
+            return true;
+        }
+        return false;
+    }
+
+    protected static void stampajSveLinije(){
+        for (AutobuskaLinija autobuskaLinija: listaLinija){
             System.out.println(autobuskaLinija);
         }
     }
 
-    public static void main(String[] args) throws IOException {
-        stampajListeLinija(listaLinija);
+    protected static void stampajSveRezervacije(){
+        for (Rezervacija rezervacija : rezervacije) {
+            System.out.println(rezervacija);
+        }
     }
 
+//
+//    public static void main(String[] args) throws IOException {
+//        stampajListeLinija(listaLinija);
+//    }
 
 
 }
