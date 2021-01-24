@@ -2,8 +2,10 @@ package markom.cs101.autobuskastanica;
 
 import java.time.LocalDateTime;
 
-public class AutobuskaLinija extends Relacija {
+public class AutobuskaLinija {
     private String prevoznik;
+    private String odMesta;
+    private String doMesta;
     private LocalDateTime vremePolaska;
     private int brSedistaUAutobusu;
     private String sifraPolaska;
@@ -13,8 +15,9 @@ public class AutobuskaLinija extends Relacija {
 
 
     public AutobuskaLinija(String odMesta, String doMesta, String prevoznik, LocalDateTime vremePolaska, int brSedistaUAutobusu, String sifraPolaska, TipVozila tipVozila, int cena) {
-        super(odMesta, doMesta);
         this.prevoznik = prevoznik;
+        this.odMesta = odMesta;
+        this.doMesta = doMesta;
         this.vremePolaska = vremePolaska;
         this.brSedistaUAutobusu = brSedistaUAutobusu;
         this.sifraPolaska = sifraPolaska;
@@ -69,6 +72,22 @@ public class AutobuskaLinija extends Relacija {
 
     public void setSifraPolaska(String sifraPolaska) {
         this.sifraPolaska = sifraPolaska;
+    }
+
+    public String getOdMesta() {
+        return odMesta;
+    }
+
+    public void setOdMesta(String odMesta) {
+        this.odMesta = odMesta;
+    }
+
+    public String getDoMesta() {
+        return doMesta;
+    }
+
+    public void setDoMesta(String doMesta) {
+        this.doMesta = doMesta;
     }
 
     public TipVozila getTipVozila() {

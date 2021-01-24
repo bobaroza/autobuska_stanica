@@ -1,15 +1,19 @@
 package markom.cs101.autobuskastanica;
 
-import java.time.LocalDateTime;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.InputMismatchException;
-import java.util.Scanner;
 
 public class Main {
-    
+
+    static Baza baza;
+
+    public static void main(String[] args) throws IOException {
+        String file = "relacije.txt";
+        baza = new BazaIzFajla(file);
+        application();
+    }
+
     public static void rezervisi() throws PrekidOperacije {
-        Baza baza=new Baza();
-//        boolean prekid=false;
 
         //while(!prekid){}
         // sve moguce polazne lokacije
@@ -54,7 +58,7 @@ public class Main {
         String ime = Tools.readString();
 
         Rezervacija rezervacija = new Rezervacija(polazak.getSifraPolaska(), ime, brMesta);
-        if (Baza.rezervisi(polazak, rezervacija)) {
+        if (baza.rezervisi(polazak, rezervacija)) {
             System.out.println("USPESNO STE REZERVISALI KARTU");
         }
         else {
@@ -65,7 +69,7 @@ public class Main {
     public static void izvezi() throws PrekidOperacije {
         System.out.println("--- Unesite ime fajla ---");
         String imeFajla = Tools.readString();
-        Baza.exportRezervacije(imeFajla);
+        baza.exportRezervacije(imeFajla);
     }
 
     public static void printMenu(){
@@ -98,10 +102,10 @@ public class Main {
                     case 2:
                         break; // jer uvek stampamo...
                     case 3:
-                        Baza.stampajSveLinije();
+                        baza.stampajSveLinije();
                         break;
                     case 4:
-                        Baza.stampajSveRezervacije();
+                        baza.stampajSveRezervacije();
                         break;
                     case 5:
                         izvezi();
@@ -116,10 +120,6 @@ public class Main {
                 System.out.println("Exiting application...");
             }
         }
-    }
-
-    public static void main(String[] args) {
-        application();
     }
 
 }
